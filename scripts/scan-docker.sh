@@ -36,7 +36,7 @@ if [[ -f "$DOCKERFILE_PATH" ]]; then
     **Arquivo:** \`$file\`  
     **Linha:** $line
     EOF
-    )
+      )
       issue_info=$(find_issue "$title" || true)
 
       if [[ -z "$issue_info" ]]; then
