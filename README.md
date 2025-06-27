@@ -28,22 +28,21 @@ Exemplo de uso:
 
 ```yaml
 name: Scan Test
-on:
-  workflow_dispatch:
 
-inputs:
-	docker-context:
-		default: 'app'
-		required: false
-		
+on: 
+  workflow_dispatch:
+    inputs:
+      docker-context:
+        default: 'app'
+        required: false
+	
 permissions: # Permissões necessárias
 	issues: write
 
 jobs:
-	call-scan:
-		runs-on: ubuntu-latest
-		steps:
-	
-	- uses: FabioBartoli/linuxtips-action-verify@v1.0.0
-	  with:
-		docker-context: ${{ github.event.inputs.docker-context }}
+  call-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: FabioBartoli/linuxtips-action-verify@v1.0.0
+        with: 
+          docker-context: ${{ github.event.inputs.docker-context }}
