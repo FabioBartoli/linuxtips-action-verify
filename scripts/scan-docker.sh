@@ -63,12 +63,27 @@ EOF
 
   if [[ -s /tmp/trivy_image.json ]] && jq -e '[.Results[].Vulnerabilities[]?] | length > 0' /tmp/trivy_image.json >/dev/null 2>&1; then
     jq -c '.Results[].Vulnerabilities[]?' /tmp/trivy_image.json | while read -r vuln; do
-      id=$(jq -r .VulnerabilityID <<<"$vuln")
-      pkg=$(jq -r .PkgName           <<<"$vuln")
-      sev=$(jq -r .Severity          <<<"$vuln")
-      title="Trivy Docker: $id in $pkg ($sev)"
-      mark_problem
-      body=$(printf '```json\n%s\n```' "$vuln")
+    id=$(jq -r '.VulnerabilityID'          <<<"$vuln")
+    pkg=$(jq -r '.PkgName'                 <<<"$vuln")
+    installed=$(jq -r '.InstalledVersion'  <<<"$vuln")
+    fixed=$(jq -r '.FixedVersion // "N/A"' <<<"$vuln")
+    sev=$(jq -r '.Severity'                <<<"$vuln")
+    title_vuln=$(jq -r '.Title // .Description | split("\n")[0]' <<<"$vuln")
+    url=$(jq -r '.PrimaryURL // (.References[0] // "")'          <<<"$vuln")
+
+    title="Trivy [$sev] $id em $pkg"
+    mark_problem
+
+    body=$(cat <<EOF
+Vulnerabilidade: \`$id\`
+Pacote afetado: \`$pkg\`
+Versão instalada: \`$installed\`
+Versão corrigida: \`$fixed\`
+Severidade: \`$sev\`
+Título: $title_vuln
+Link: $url
+EOF
+    )
       issue_info=$(find_issue "$title" || true)
       if [[ -z "$issue_info" ]]; then
         create_issue "$title" "$body" "docker-security"
