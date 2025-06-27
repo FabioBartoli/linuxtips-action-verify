@@ -45,7 +45,7 @@ EOF
   )
   issue_info=$(find_issue "$title" || true)
   if [[ -z "$issue_info" ]]; then
-    create_issue "$title" "```json\n$vio\n```" "terraform-security" || true
+    create_issue "$title" "$body" "terraform-security" || true
   else
     num=${issue_info%%:*}
     state=${issue_info##*:}
@@ -76,7 +76,7 @@ if (( mis_count > 0 )); then
     line=$(jq -r '.Line'         <<<"$mis")
     url=$(jq -r '.PrimaryURL // (.References[0] // "")' <<<"$mis")
 
-    title="Trivy [$sev] $id"
+    title="Trivy Config [$sev]: $id"
     mark_problem || true
 
     body=$(cat <<EOF
@@ -90,7 +90,7 @@ EOF
     )
     issue_info=$(find_issue "$title" || true)
     if [[ -z "$issue_info" ]]; then
-      create_issue "$title" "```json\n$mis\n```" "terraform-security" || true
+      create_issue "$title" "$body" "terraform-security" || true
     else
       num=${issue_info%%:*}
       state=${issue_info##*:}

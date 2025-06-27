@@ -71,7 +71,7 @@ EOF
     title_vuln=$(jq -r '.Title // .Description | split("\n")[0]' <<<"$vuln")
     url=$(jq -r '.PrimaryURL // (.References[0] // "")'          <<<"$vuln")
 
-    title="Trivy [$sev] $id em $pkg"
+    title="Trivy Image [$sev]: $id em $pkg"
     mark_problem
 
     body=$(cat <<EOF
