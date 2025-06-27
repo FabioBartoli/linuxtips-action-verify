@@ -58,8 +58,8 @@ EOF
   trivy image "$image" \
     --severity HIGH,CRITICAL \
     --format json \
+    --exit-code 0 \
     --output /tmp/trivy_image.json || true
-  set -e
 
   if [[ -s /tmp/trivy_image.json ]] && jq -e '[.Results[].Vulnerabilities[]?] | length > 0' /tmp/trivy_image.json >/dev/null 2>&1; then
     jq -c '.Results[].Vulnerabilities[]?' /tmp/trivy_image.json | while read -r vuln; do
@@ -79,6 +79,9 @@ EOF
       fi
     done
   fi
+
+  set -e
+  
 else
   echo "Nenhum Dockerfile encontrado — pulando verificações Docker"
 fi
