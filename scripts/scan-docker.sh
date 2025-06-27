@@ -41,8 +41,9 @@ if [[ -f "$DOCKERFILE_PATH" ]]; then
       **Descrição:**  
       > $description
 
-        [Mais informações]($url)
-        EOF
+      [Mais informações]($url)
+      EOF
+      )
       issue_info=$(find_issue "$title" || true)
 
       if [[ -z "$issue_info" ]]; then
