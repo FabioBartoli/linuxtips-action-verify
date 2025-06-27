@@ -37,6 +37,9 @@ runs:
         tar -xf terrascan.tar.gz terrascan && sudo install terrascan /usr/local/bin && rm terrascan terrascan.tar.gz
         terrascan
 
+    - name: Checkout
+      use: actions/checkout@v4
+
     - name: Scan Docker
       shell: bash
       env:
