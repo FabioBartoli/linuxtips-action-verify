@@ -35,7 +35,7 @@ on:
       docker-context:
         default: 'app'
         required: false
-	
+
 permissions: # Permissões necessárias
 	issues: write
 
