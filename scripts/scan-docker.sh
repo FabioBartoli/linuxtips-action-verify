@@ -23,27 +23,20 @@ if [[ -f "$DOCKERFILE_PATH" ]]; then
     jq -c '.[]' /tmp/hadolint.json | while read -r finding; do
       code=$(jq -r .code    <<<"$finding")
       msg=$(jq -r .message <<<"$finding")
-      id=$(jq -r .VulnerabilityID <<<"$vuln")
-      pkg=$(jq -r .PkgName <<<"$vuln")
-      version=$(jq -r .InstalledVersion <<<"$vuln")
-      severity=$(jq -r .Severity <<<"$vuln")
-      title_text=$(jq -r .Title <<<"$vuln")
-      description=$(jq -r .Description <<<"$vuln")
-      url=$(jq -r .PrimaryURL <<<"$vuln")
+      level=$(jq -r .level <<<"$finding")
+      line=$(jq -r .line <<<"$finding")
+      file=$(jq -r .file <<<"$finding")
       title="Hadolint [$code] $msg"
       mark_problem
 
       body=$(cat <<EOF
-      **Pacote:** \`$pkg\`  
-      **Versão instalada:** \`$version\`  
-      **Gravidade:** \`$severity\`  
-      **Título:** $title_text  
-      **Descrição:**  
-      > $description
-
-      [Mais informações]($url)
-      EOF
-      )
+    **Código:** \`$code\`  
+    **Mensagem:** $msg  
+    **Nível:** \`$level\`  
+    **Arquivo:** \`$file\`  
+    **Linha:** $line
+    EOF
+    )
       issue_info=$(find_issue "$title" || true)
 
       if [[ -z "$issue_info" ]]; then
