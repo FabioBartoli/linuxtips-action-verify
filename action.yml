@@ -30,11 +30,13 @@ runs:
         curl -sL "$TERRASCAN_URL" -o terrascan.tar.gz
         tar -xf terrascan.tar.gz terrascan && sudo install terrascan /usr/local/bin && rm terrascan terrascan.tar.gz
         terrascan
-        
+
     - name: Scan Docker
       shell: bash
-      run: echo "Scan Docker"
+      run: |
+        bash "${{ github.action_path }}/scripts/scan-docker.sh"
 
     - name: Scan Terraform
       shell: bash
-      run: echo "Scan Terraform"
+      run: |
+        bash "${{ github.action_path }}/scripts/scan-terraform.sh"
