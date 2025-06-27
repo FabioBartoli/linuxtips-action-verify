@@ -30,13 +30,14 @@ if [[ -f "$DOCKERFILE_PATH" ]]; then
       mark_problem
 
       body=$(cat <<EOF
-    **Código:** \`$code\`  
-    **Mensagem:** $msg  
-    **Nível:** \`$level\`  
-    **Arquivo:** \`$file\`  
+    **Código:** \`$code\`
+    **Mensagem:** $msg
+    **Nível:** \`$level\`
+    **Arquivo:** \`$file\`
     **Linha:** $line
-    EOF
+EOF
       )
+      
       issue_info=$(find_issue "$title" || true)
 
       if [[ -z "$issue_info" ]]; then
