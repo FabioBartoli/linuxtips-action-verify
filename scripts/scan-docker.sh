@@ -16,7 +16,6 @@ if [[ -f "$DOCKERFILE_PATH" ]]; then
   set +e
   hadolint -f json "$DOCKERFILE_PATH" > /tmp/hadolint.json
   HL_EXIT=$?
-  set -e
   cat /tmp/hadolint.json || echo "(empty or missing)"
 
   if jq -e '.[0]?' /tmp/hadolint.json >/dev/null 2>&1; then
@@ -24,10 +23,26 @@ if [[ -f "$DOCKERFILE_PATH" ]]; then
     jq -c '.[]' /tmp/hadolint.json | while read -r finding; do
       code=$(jq -r .code    <<<"$finding")
       msg=$(jq -r .message <<<"$finding")
+      id=$(jq -r .VulnerabilityID <<<"$vuln")
+      pkg=$(jq -r .PkgName <<<"$vuln")
+      version=$(jq -r .InstalledVersion <<<"$vuln")
+      severity=$(jq -r .Severity <<<"$vuln")
+      title_text=$(jq -r .Title <<<"$vuln")
+      description=$(jq -r .Description <<<"$vuln")
+      url=$(jq -r .PrimaryURL <<<"$vuln")
       title="Hadolint [$code] $msg"
       mark_problem
 
-      body=$(printf '```json\n%s\n```' "$finding")
+      body=$(cat <<EOF
+      **Pacote:** \`$pkg\`  
+      **Versão instalada:** \`$version\`  
+      **Gravidade:** \`$severity\`  
+      **Título:** $title_text  
+      **Descrição:**  
+      > $description
+
+        [Mais informações]($url)
+        EOF
       issue_info=$(find_issue "$title" || true)
 
       if [[ -z "$issue_info" ]]; then
@@ -40,14 +55,16 @@ if [[ -f "$DOCKERFILE_PATH" ]]; then
         fi
       fi
     done
-    set -e
   fi
 
   ########### SCAN TRIVY ##############
+
+  set +e
   trivy image "$image" \
     --severity HIGH,CRITICAL \
     --format json \
     --output /tmp/trivy_image.json || true
+  set -e
 
   if [[ -s /tmp/trivy_image.json ]] && jq -e '[.Results[].Vulnerabilities[]?] | length > 0' /tmp/trivy_image.json >/dev/null 2>&1; then
     jq -c '.Results[].Vulnerabilities[]?' /tmp/trivy_image.json | while read -r vuln; do

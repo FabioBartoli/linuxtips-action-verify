@@ -17,6 +17,7 @@ terrascan scan \
   --iac-dir "$WORKDIR" \
   -o json > /tmp/terrascan.json
 ts_exit=$?
+set -e
 
 jq -c '.results.violations[]?' /tmp/terrascan.json | while read -r vio; do
   rule=$(jq -r .rule_name <<<"$vio")
@@ -35,16 +36,17 @@ jq -c '.results.violations[]?' /tmp/terrascan.json | while read -r vio; do
 done
 
 ########### SCAN TRIVY ##############
+set +e
 trivy config \
   --format json \
   --severity HIGH,CRITICAL \
   --skip-files Dockerfile \
   -o /tmp/trivy_tf.json \
   "$WORKDIR" || true
+set -e
 
 mis_count=$(jq '[(.Results // [])[]?.Misconfigurations[]?] | length' /tmp/trivy_tf.json 2>/dev/null || echo 0)
 if (( mis_count > 0 )); then
-  set +e
   jq -c '(.Results // [])[]?.Misconfigurations[]?' /tmp/trivy_tf.json | while read -r mis; do
     id=$(jq -r .ID <<<"$mis")
     title="Trivy Terraform: $id"
@@ -60,7 +62,6 @@ if (( mis_count > 0 )); then
       fi
     fi
   done
-  set -e
 else
   echo "::warning:: Trivy config não gerou /tmp/trivy_tf.json ou não encontrou problemas nos arquivos"
 fi
