@@ -37,7 +37,7 @@ on:
         required: false
 
 permissions: # Permissões necessárias
-	issues: write
+  issues: write
 
 jobs:
   call-scan:
